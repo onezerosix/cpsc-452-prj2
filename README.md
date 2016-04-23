@@ -1,2 +1,2 @@
 # cpsc-452-prj2
-Crypto DES and RAS
+Crypto DES and RSA

@@ -16,7 +16,7 @@ Filename:               Description:
   CipherDriver.py           The main program that will be called
   CipherInterface.py        The base class used in the cipher classes
   DESCipher.py              The DES Cipher implementation class
-  AESCipher.py The Row Transposition Cipher implementation class
+  AESCipher.py              The Row Transposition Cipher implementation class
   
 Extra Files:
   plainInput.txt            Example text input file
