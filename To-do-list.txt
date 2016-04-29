@@ -1,0 +1,15 @@
+To-Do List:
+Lister: Sahar
+Typer: Andrew
+1) DES key part that repeats twice in both encrypt/decrypt
+2) Goffman version of converting hex string key
+3) RSA pyrcrypto version or import RSA? LET'S DECIDE!!
+  - Check if the RSA version allows for decryption with a public key
+  - if it does then use that over pyrcrypto
+4) CFB and CBC for RSA for even more extra credit
+5) CFB Encrypt needs to be fixed because of some things
+6) Implement CFB Decrypt which is almost the same
+7) CBC encrypt/decrypt
+8) README
+9) Fix the driver to take extra argument for CFB mode
+10) Change the drivers/readme to implement
