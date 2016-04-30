@@ -101,7 +101,7 @@ def main ( ):
             \n- DES: Data Encryption Standard\
             \n- RSA: Row Transposition")
   
-  writeFile(outputFile, ciphered)                            # print converted text
+  writeFile(outputFile, converted)                            # print converted text
       
 if __name__ == '__main__':
   main( )
