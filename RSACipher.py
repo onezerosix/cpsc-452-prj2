@@ -38,3 +38,33 @@ class RSACipher (CipherInterface):
     # decrypt with help of Crypto library
     # self._key.decrypt(<ciphertext>)
     return "deciphered"
+
+
+""" 2 versions
+import rsa
+from rsa import key, common
+(pubKey, privKey) = rsa.newkeys(512, accurate=True) # 512 is max key size, for project need to import key, not generate
+with open('things-changed.txt') as f:
+  text = f.read()
+blocks = []
+for i in range(len(text)/53): # can only handle < 54 bytes at a time
+  blocks.append(text[i*53:(i+1)*53])
+cipherBlocks = []
+for i in range(len(blocks)):
+  cipherBlocks.append(rsa.encrypt(blocks[i],pubKey))
+decrypted = []
+for i in range(len(cipherBlocks)):
+  decrypted.append(rsa(cipherBlocks[i], privKey))
+# can encrypt with privKey but can't decrypt with pubKey
+
+from Crypto.PublicKey import RSA
+with open('pubkey.pem') as f:
+  pubKey = RSA.importKey(f.read())
+with open('privkey.pem') as f:
+  privKey = RSA.importKey(f.read())
+with open('README.txt') as f:
+  text = f.read()
+cipherBlock = pubKey.encrypt(text[:256], 32) # only handles < 257 bytes at a time, 32 is random int
+decryptedBlock = privKey.decrypt(cipherBlock)
+# can encrypt with privKey but can't decrypt with pubKey
+"""
