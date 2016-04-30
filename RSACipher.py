@@ -20,13 +20,14 @@ from Crypto import Random
 from CipherInterface import CipherInterface
 import string
 
-class RASCipher (CipherInterface):
+class RSACipher (CipherInterface):
   def __init__(self):
     self._key = None
 
   def setKey(self,key):
     # key is stored inside a file (public or private)
     # store key: self._key = RSA.importKey(f.read())
+    return False
 
   def encrypt(self,plaintext):
     # encrypt with help of Crypto library
