@@ -25,19 +25,26 @@ class RSACipher (CipherInterface):
     self._key = None
 
   def setKey(self,key):
-    # key is stored inside a file (public or private)
+    # key is stored inside a file (public or private)f
     # store key: self._key = RSA.importKey(f.read())
-    return False
+    success = False
+    with open(key) as f:
+      self._key = RSA.importKey(f.read())                   # self._key is now an _RSA Object
+      if (self._key):
+        success = True
+    return success
 
   def encrypt(self,plaintext):
     # encrypt with help of Crypto library
     # self._key.encrypt(<plaintext>, 32) # 32 might be wrong, according to documentation, it's a random number
-    return "enciphered"
+    enciphered = self._key.encrypt(plaintext, 32)
+    return enciphered[0]                                    # Pycrypto's RSA always returns a tuple, with the 2nd item being None
 
   def decrypt(self,ciphertext):
     # decrypt with help of Crypto library
     # self._key.decrypt(<ciphertext>)
-    return "deciphered"
+    deciphered = self._key.decrypt(ciphertext)
+    return deciphered                                       # Doesn't return a tuple for decryption
 
 
 """ 2 versions
