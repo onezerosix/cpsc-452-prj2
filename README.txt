@@ -16,50 +16,53 @@ Filename:               Description:
   CipherDriver.py           The main program that will be called
   CipherInterface.py        The base class used in the cipher classes
   DESCipher.py              The DES Cipher implementation class
-  AESCipher.py              The Row Transposition Cipher implementation class
+  RSACipher.py              The RSA Cipher implementation class
+  DES-CFB-Cipher.py         The DES Cipher implementation class with CFB mode
+  DES-CBC-Cipher.py         The DES Cipher implementation class with CBC mode
+  RSA-CFB-Cipher.py         The RSA Cipher implementation class with CFB mode
+  RSA-CBC-Cipher.py         The RSA Cipher implementation class with CBC mode
   
 Extra Files:
-  plainInput.txt            Example text input file
+  in.txt            Example text input file
+  pubkey.pem        Test key used for encryption in RSA
+  privkey.pem       Test key used for decryption in RSA
 
 Makefile:
 No makefile is necessary, just run the command in the terminal with all of the files in the folder.
 
 Assumptions:
 As specified in class, all input files contain only lowercase letters and assume no punctuation or spaces.
+Pycrypto was used in both implementations, install using:
+  $pip install pycrypto
 
 How to execute the program in the terminal:
 
-    python3.4 CipherDriver.py <CIPHER NAME> <KEY> <ENC/DEC> <INPUTFILE> <OUTPUT FILE>
+    python3.4 CipherDriver.py <CIPHER NAME> <KEY> <ENC/DEC> <INPUTFILE> <OUTPUT FILE> {<IV>}
     
 The following execution code was used before sending in the tar:
-  Vigenere Cipher:
+  DES Cipher:
     python3.4 CipherDriver.py VIG security ENC plainInput.txt encOutput.txt
     python3.4 CipherDriver.py VIG security DEC encOutput.txt encOutput.txt
   
-  Caesar Cipher:
-    python3.4 CipherDriver.py CES 3 ENC plainInput.txt encOutput.txt
-    python3.4 CipherDriver.py CES 3 DEC encOutput.txt decOutput.txt
+  RSA Cipher:
+    python3.4 CipherDriver.py RSA pubkey.pem ENC in.txt ciphered.txt
+    python3.4 CipherDriver.py RSA privkey.pem DEC ciphered.txt deciphered.txt
   
-  Railfence Cipher:
-    python3.4 CipherDriver.py RFC 3 ENC plainInput.txt encOutput.txt
-    python3.4 CipherDriver.py RFC 3 DEC encOutput.txt decoutput.txt
+  DES CFB/CBC:
+    - todo
   
-  Playfair Cipher:
-    python3.4 CipherDriver.py PLF security ENC plainInput.txt encOutput.txt
-    python3.4 CipherDriver.py PLF security DEC encOutput.txt decOutput.txt
-  
-  Row Transposition Cipher:
-    python3.4 CipherDriver.py RTS 4213 ENC plainInput.txt encOutput.txt
-    python3.4 CipherDriver.py RTS 4213 DEC encOutput.txt decOutput.txt
+  RSA CFB/CBC:
+    - todo
 
 • CIPHER NAME: Is the name of the cipher. Valid names are:
-– PLF: Playfair
-– RTS: Row Transposition
-– RFC: Railfence
-– VIG: Vigenre
-– CES: Caesar
+- DES: Data encryption standard
+- DES-CFB: DES using CFB mode
+- DES-CBC: DES using CBC mode
+- RSA: RSA algorithm
+- RSA-CFB: RSA using CFB mode
+- RSA-CBC: RSA using CBC mode
 
-• KEY: the encryption key to use.
+• KEY: the encryption key to use, for RSA it is the name of the .pem key file
 • ENC/DEC: whether to encrypt or decrypt, respectively.
 • INPUT FILE: the file from which to read the input.
 • OUTPUT FILE: the file to which the output shall be written.
