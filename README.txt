@@ -45,8 +45,8 @@ The following execution code was used before sending in the tar:
     python3.4 CipherDriver.py VIG security DEC encOutput.txt encOutput.txt
   
   RSA Cipher:
-    python3.4 CipherDriver.py RSA pubkey.pem ENC in.txt ciphered.txt
-    python3.4 CipherDriver.py RSA privkey.pem DEC ciphered.txt deciphered.txt
+    python CipherDriver.py RSA pubkey.pem ENC in.txt ciphered.txt
+    python CipherDriver.py RSA privkey.pem DEC ciphered.txt deciphered.txt
   
   DES CFB/CBC:
     - todo
