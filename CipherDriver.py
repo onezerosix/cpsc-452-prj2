@@ -114,7 +114,18 @@ def main ( ):
       converted = decryptCFB(des, toConvert, IV, s)                    # Decrypt and receive the deciphered text
       print("The deciphered text is: {}".format(converted))
     
-    
+  elif cipherName == "RSACFB":
+    rsa = RSACipher()                                       # Create an instance of the class
+    if rsa.setKey(key) == False:                            # Attempt to set the key
+      badUser("Invalid key for RSA Cipher. Key must be 16 hexidecimal characters (0-9, a-f)!")
+    if mode == "ENC":
+      #print("ENC: Encryption mode selected. Encrypting...")
+      converted = encryptCFB(rsa, toConvert, IV, s)                     # Encrypt and receive the ciphered text
+      print("The ciphered text is: {}".format(converted))
+    elif mode == "DEC":
+      #print("DEC: Decryption mode selected. Decrypting...")
+      converted = decryptCFB(rsa, toConvert, IV, s)                    # Decrypt and receive the deciphered text
+      print("The deciphered text is: {}".format(converted))  
     
   else:                                                     # Invalid Cipher
     badUser("Invalid <CIPHER NAME>, please use the following names:\
