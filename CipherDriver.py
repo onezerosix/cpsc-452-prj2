@@ -54,13 +54,13 @@ def main ( ):
   outputFile = sys.argv[5]                                  # <OUTPUTFILE>
 
   # for CBC and CFB modes
-  if cipherName in {"DESCBC", "RSACBC"}: # set of non ECB mode ciphers
+  if cipherName in {"DESCBC", "RSACBC"}: # set of CBC mode ciphers
     if len(sys.argv) != 7:
       badUser("ERROR: need to provide IV parameter for CBC/CFB\ncheck README")
     else:
       IV = sys.argv[6]
-  elif cipherName in {"DESCFB", "RSACFB"}:
-    # todo: implement later
+  elif cipherName in {"DESCFB", "RSACFB"}: # set of CFB mode ciphers
+    # TODO: implement later
     IV = sys.argv[6]
     s = int(sys.argv[7])
   elif len(sys.argv) != 6:
@@ -69,69 +69,55 @@ def main ( ):
   toConvert = readFile(inputFile)                           # attempt to read file
   
   if cipherName == "DES":                                   # <CIPHER NAME> = DES --> DES Cipher
-    des = DESCipher()                                       # Create an instance of the class
-    if des.setKey(key) == False:                            # Attempt to set the key
+    cipher = DESCipher()                                       # Create an instance of the class
+    if cipher.setKey(key) == False:                            # Attempt to set the key
       badUser("Invalid key for DES Cipher. Key must be 16 hexidecimal characters (0-9, a-f)!")
 
-    if mode == "ENC":
-      print("ENC: Encryption mode selected. Encrypting...")
-      converted = des.encrypt(toConvert)                     # Encrypt and receive the ciphered text
-      print("The ciphered text is: {}".format(converted))
-    elif mode == "DEC":
-      print("DEC: Decryption mode selected. Decrypting...")
-      converted = des.decrypt(toConvert)                   # Decrypt and receive the deciphered text
-      print("The deciphered text is: {}".format(converted))
-    else:
-      badUser("Error, please specify <ENC/DEC>")
-
   elif cipherName == "RSA":
-    rsa = RSACipher()                                       # <CIPHER NAME> = RSA --> RSA Cipher
-    if rsa.setKey(key) == False:                            # Attempt to set the key
+    cipher = RSACipher()                                       # <CIPHER NAME> = RSA --> RSA Cipher
+    if cipher.setKey(key) == False:                            # Attempt to set the key
       #TODO: know key reqs
       badUser("Invalid key for RSA Cipher. Key can only be ?")
 
-    if mode == "ENC":
-      print("ENC: Encryption mode selected. Encrypting...")
-      converted = rsa.encrypt(toConvert)                     # Encrypt and receive the ciphered text
-      print("The ciphered text is: {}".format(converted))
-    elif mode == "DEC":
-      print("DEC: Decryption mode selected. Decrypting...")
-      converted = rsa.decrypt(toConvert)                   # Decrypt and receive the deciphered text
-      print("The deciphered text is: {}".format(converted))
-
-    else:
-      badUser("Error, please specify <ENC/DEC>")
   elif cipherName == "DESCFB":
-    des = DESCipher()                                       # Create an instance of the class
-    if des.setKey(key) == False:                            # Attempt to set the key
+    cipher = DESCipher()                                       # Create an instance of the class
+    if cipher.setKey(key) == False:                            # Attempt to set the key
       badUser("Invalid key for DES Cipher. Key must be 16 hexidecimal characters (0-9, a-f)!")
-    if mode == "ENC":
-      #print("ENC: Encryption mode selected. Encrypting...")
-      converted = encryptCFB(des, toConvert, IV, s)                     # Encrypt and receive the ciphered text
-      print("The ciphered text is: {}".format(converted))
-    elif mode == "DEC":
-      #print("DEC: Decryption mode selected. Decrypting...")
-      converted = decryptCFB(des, toConvert, IV, s)                    # Decrypt and receive the deciphered text
-      print("The deciphered text is: {}".format(converted))
-    
+
   elif cipherName == "RSACFB":
-    rsa = RSACipher()                                       # Create an instance of the class
-    if rsa.setKey(key) == False:                            # Attempt to set the key
-      badUser("Invalid key for RSA Cipher. Key must be 16 hexidecimal characters (0-9, a-f)!")
-    if mode == "ENC":
-      #print("ENC: Encryption mode selected. Encrypting...")
-      converted = encryptCFB(rsa, toConvert, IV, s)                     # Encrypt and receive the ciphered text
-      print("The ciphered text is: {}".format(converted))
-    elif mode == "DEC":
-      #print("DEC: Decryption mode selected. Decrypting...")
-      converted = decryptCFB(rsa, toConvert, IV, s)                    # Decrypt and receive the deciphered text
-      print("The deciphered text is: {}".format(converted))  
-    
+    cipher = RSACipher()                                       # Create an instance of the class
+    if cipher.setKey(key) == False:                            # Attempt to set the key
+      #TODO: know key reqs
+      badUser("Invalid key for RSA Cipher. Key can only be ?")
+
   else:                                                     # Invalid Cipher
     badUser("Invalid <CIPHER NAME>, please use the following names:\
             \n- DES: Data Encryption Standard\
             \n- RSA: Row Transposition")
-  
+
+  if mode == "ENC":
+    print("ENC: Encryption mode selected. Encrypting...")
+    if cipherName in {"DESCBC", "RSACBC"}:
+      #TODO: implement
+      badUser("CBC not implemented yet")
+    elif cipherName in {"DESCFB", "RSACFB"}:
+      converted = encryptCFB(cipher, toConvert, IV, s)
+    else:
+      converted = cipher.encrypt(toConvert)                     # Encrypt and receive the ciphered text
+    print("The ciphered text is: {}".format(converted))
+  elif mode == "DEC":
+    print("DEC: Decryption mode selected. Decrypting...")
+    if cipherName in {"DESCBC", "RSACBC"}:
+      #TODO: implement
+      badUser("CBC not implemented yet")
+    elif cipherName in {"DESCFB", "RSACFB"}:
+      converted = decryptCFB(cipher, toConvert, IV, s)
+    else:
+      converted = cipher.decrypt(toConvert)                   # Decrypt and receive the deciphered text
+    print("The deciphered text is: {}".format(converted))
+  else:
+    badUser("Error, please specify <ENC/DEC>")
+
   writeFile(outputFile, converted)                            # print converted text
       
 if __name__ == '__main__':
