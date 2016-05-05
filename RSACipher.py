@@ -37,14 +37,39 @@ class RSACipher (CipherInterface):
   def encrypt(self,plaintext):
     # encrypt with help of Crypto library
     # self._key.encrypt(<plaintext>, 32) # 32 might be wrong, according to documentation, it's a random number
-    enciphered = self._key.encrypt(plaintext, 32)
-    return enciphered[0]                                    # Pycrypto's RSA always returns a tuple, with the 2nd item being None
+    enciphered = ""
+    blocks = []
+    temp = 0
+    for i in range(len(plaintext)/256):                     # For every block, block cannot be larger than the modulus 256
+      blocks.append(plaintext[i*256:(i+1)*256])             # Split the plaintext into blocks
+      temp = i + 1                                          # Save the block counter in case there is an extra block to encrypt
+    if range(len(plaintext)%256 != 0):                      # Check if there is a remaining block
+      blocks.append(plaintext[temp*256:(temp+1)*256])       # If there is, append the remaining bytes
+    cipherBlocks = []                                       # Initialized empty list of cipher blocks
+    for i in range(len(blocks)):                                # For each block of plaintext, encrypt the block
+      cipherBlocks.append(self._key.encrypt(blocks[i], 32)[0])  # Note: Pycrypto's RSA always returns a tuple, with the 2nd item being None
+    enciphered = "".join(cipherBlocks)                          # Concatinate the encrypted blocks into a string
+    return enciphered                                           # Return the ciphered text
 
   def decrypt(self,ciphertext):
     # decrypt with help of Crypto library
     # self._key.decrypt(<ciphertext>)
-    deciphered = self._key.decrypt(ciphertext)
-    return deciphered                                       # Doesn't return a tuple for decryption
+    deciphered = ""
+    try:                                                    # Checks if the key is a private key
+      blocks = []                                           # Initialized empty list of blocks to decrypt
+      temp = 0                                              # in case of an imperfect size
+      for i in range(len(ciphertext)/256):                  # For every block, block cannot be larger than the modulus 256
+        blocks.append(ciphertext[i*256:(i+1)*256])          # Split the ciphertext into blocks
+        temp = i + 1                                        # Save the block counter in case there is an extra block
+      if range(len(ciphertext)%256 != 0):                   # Check if there is a remaining block
+        blocks.append(ciphertext[temp*256:(temp+1)*256])    # If there is, append the remaining bytes to the block
+      decipherBlocks = []                                   # Initialized empty list of deciphered blocks
+      for i in range(len(blocks)):                          # For each block of ciphertext, encrypt the block
+        decipherBlocks.append(self._key.decrypt(blocks[i])) # Note: RSAObj's decryption function doesn't return a tuple like encrypt
+      deciphered = "".join(decipherBlocks)                  # Concatinate the decrypted blocks into a string
+    except TypeError:                                       # If a public key is used to decrypt, RSA returns an error
+      deciphered = "TypeError: This version of RSA can only decrypt using a private key"
+    return deciphered                                       # Return the deciphered text
 
 
 """ 2 versions
