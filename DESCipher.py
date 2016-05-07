@@ -71,7 +71,7 @@ class DESCipher (CipherInterface):
     encipher = DES.new(DESkey)                              # Create new DES object with given key, which defaults to ECB mode
 		
     if len(plaintext) % DES.block_size is not 0:            # Check if the final plaintext block fits into 8 bytes (64 bits).
-      plaintext = pad(plaintext)
+      plaintext = self.pad(plaintext)
 
     ciphertext = encipher.encrypt(plaintext)                # Encrypt the plaintext and store it in the ciphertext string
 

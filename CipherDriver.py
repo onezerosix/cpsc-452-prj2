@@ -4,6 +4,47 @@ Assignment 2
 Cipher Driver
 
 Python 2.7
+
+CFB is slow
+
+run long files:
+python CipherDriver.py DES 1234567890abcdef ENC long.txt des.enc
+python CipherDriver.py DES 1234567890abcdef DEC des.enc des.dec
+python CipherDriver.py RSA pubkey.pem ENC long.txt rsa.enc
+python CipherDriver.py RSA privkey.pem DEC rsa.enc rsa.dec
+python CipherDriver.py DESCBC 1234567890abcdef ENC long.txt descbc.enc 01234567
+python CipherDriver.py DESCBC 1234567890abcdef DEC descbc.enc descbc.dec 01234567
+python CipherDriver.py RSACBC pubkey.pem ENC long.txt rsacbc.enc 01234567
+python CipherDriver.py RSACBC privkey.pem DEC rsacbc.enc rsacbc.dec 01234567
+python CipherDriver.py DESCFB 1234567890abcdef ENC long.txt descfb.enc 01234567 57
+python CipherDriver.py DESCFB 1234567890abcdef DEC descfb.enc descfb.dec 01234567 57
+python CipherDriver.py RSACFB pubkey.pem ENC long.txt rsacfb.enc iviviviv 30
+python CipherDriver.py RSACFB privkey.pem DEC rsacfb.enc rsacfb.dec iviviviv 30
+
+run short files:
+python CipherDriver.py DES 1234567890abcdef ENC in.txt des.enc
+python CipherDriver.py DES 1234567890abcdef DEC des.enc des.dec
+python CipherDriver.py RSA pubkey.pem ENC in.txt rsa.enc
+python CipherDriver.py RSA privkey.pem DEC rsa.enc rsa.dec
+python CipherDriver.py DESCBC 1234567890abcdef ENC in.txt descbc.enc 01234567
+python CipherDriver.py DESCBC 1234567890abcdef DEC descbc.enc descbc.dec 01234567
+python CipherDriver.py RSACBC pubkey.pem ENC in.txt rsacbc.enc 01234567
+python CipherDriver.py RSACBC privkey.pem DEC rsacbc.enc rsacbc.dec 01234567
+python CipherDriver.py DESCFB 1234567890abcdef ENC in.txt descfb.enc 01234567 3
+python CipherDriver.py DESCFB 1234567890abcdef DEC descfb.enc descfb.dec 01234567 3
+python CipherDriver.py RSACFB pubkey.pem ENC in.txt rsacfb.enc iviviviv 30
+python CipherDriver.py RSACFB privkey.pem DEC rsacfb.enc rsacfb.dec iviviviv 30
+
+remove .enc files:
+rm *.enc
+
+testing: short, long (0 is untested, 1 is passed)
+DES:    1, 1
+DESCBC: 1, 1
+DESCFB: 1, weird padding & WARNING ABOUT FITTING BLOCKS
+RSA:    1, 1
+RSACBC: too much padding, ENCRYPTION FAILED - couldn't process a block
+RSACFB: weird padding, weird padding & WARNING ABOUT FITTING BLOCKS
 """
 
 import sys
