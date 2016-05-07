@@ -11,6 +11,7 @@ from CipherInterface import CipherInterface
 from DESCipher import DESCipher
 from RSACipher import RSACipher
 from CFBMode import *
+from CBCMode import *
 
 # Attempt to read the content of the specified filename
 def readFile(fileName):     
@@ -20,8 +21,7 @@ def readFile(fileName):
     return text
   except IOError:
     badUser("ERROR: could not read to " + fileName)
-  
-  
+
 # Attempt to write the content to the specified filename
 def writeFile(fileName, content):
   try:
@@ -50,11 +50,15 @@ def main ( ):
   if cipherName in {"DESCBC", "RSACBC"}: # set of CBC mode ciphers
     if len(sys.argv) != 7:
       badUser("ERROR: incorrect number of parameters for CBC\ncheck README")
+    elif len(sys.argv[6]) != 8:
+      badUser("ERROR: IV isn't 8 characters\ncheck README")
     else:
       IV = sys.argv[6]
   elif cipherName in {"DESCFB", "RSACFB"}: # set of CFB mode ciphers
     if len(sys.argv) != 8:
       badUser("ERROR: incorrect number of parameters for CFB\ncheck README")
+    elif len(sys.argv[6]) != 8:
+      badUser("ERROR: IV isn't 8 characters\ncheck README")
     else:
       IV = sys.argv[6]
       try: # ensure s is an int
@@ -82,24 +86,34 @@ def main ( ):
   if mode == "ENC":
     print("ENC: Encryption mode selected. Encrypting...")
     if cipherName in {"DESCBC", "RSACBC"}:
-      #TODO: implement CBC
-      badUser("CBC not implemented yet")
+      if cipherName == "DESCBC":
+        n = 8
+      else:
+        n = (cipher._key.size()/8)+1 # maximum size of text that the key can handle in bytes
+        IV += IV * (n - len(IV)) # duplicate IV to fit n
+        IV = IV[:n] # cut off the extra characters
+      converted = encryptCBC(cipher, toConvert, IV, n)
     elif cipherName in {"DESCFB", "RSACFB"}:
       converted = encryptCFB(cipher, toConvert, IV, s)
     else:
       converted = cipher.encrypt(toConvert)                     # Encrypt and receive the ciphered text
-    print("The ciphered text is: {}".format(converted))
+#    print("The ciphered text is: {}".format(converted))
 
   elif mode == "DEC":
     print("DEC: Decryption mode selected. Decrypting...")
     if cipherName in {"DESCBC", "RSACBC"}:
-      #TODO: implement CBC
-      badUser("CBC not implemented yet")
+      if cipherName == "DESCBC":
+        n = 8
+      else:
+        n = 256#(cipher._key.size()/8)+1 # maximum size of text that the key can handle in bytes
+        IV += IV * (n - len(IV)) # duplicate IV to fit n
+        IV = IV[:n] # cut off the extra characters
+      converted = decryptCBC(cipher, toConvert, IV, n)
     elif cipherName in {"DESCFB", "RSACFB"}:
       converted = decryptCFB(cipher, toConvert, IV, s)
     else:
       converted = cipher.decrypt(toConvert)                   # Decrypt and receive the deciphered text
-    print("The deciphered text is: {}".format(converted))
+#    print("The deciphered text is: {}".format(converted))
   else:
     badUser("ERROR: please specify <ENC/DEC>")
 

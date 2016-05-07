@@ -14,6 +14,10 @@ encryption and decryption with the DES class from the pyCrpto library.
 
 To install pyCrypto on linux/Ubuntu :
   $pip install pycrypto
+  
+example run:
+python CipherDriver.py DES 1234567890abcdef ENC long.txt out.txt
+python CipherDriver.py DES 1234567890abcdef DEC out.txt out2.txt
 """
 
 from Crypto.Cipher import DES
@@ -50,7 +54,10 @@ class DESCipher (CipherInterface):
   #   ex:   Last block of plaintext = "cat"
   #         Padded = "cat00005"
   def pad(self,plaintext):
-    padLength = DES.block_size - (len(plaintext) % DES.block_size) # Calculate how many bytes must be padded
+    if len(plaintext) % DES.block_size != 0:
+      padLength = DES.block_size - (len(plaintext) % DES.block_size) # Calculate how many bytes must be padded
+    else:
+      padLength = 0
 
     for i in range(padLength -1):                           # Append (padLength - 1) 0's to the plaintext.
       plaintext += chr(ord('0'))                            # Add 0 (character) as a pad
