@@ -8,7 +8,7 @@ Huy Le            hqle@csu.fullerton.edu
 Sahar Ghanei      sghanei@csu.fullerton.edu
 Joshua Womack     emailwomack@gmail.com
 
-Programming Language: Python 3.4, tabs converted to spaces with 2 spaces per indentation
+Programming Language: Python, tabs converted to spaces with 2 spaces per indentation
 
 Filename:               Description:
   README.txt                The current file with instructions and other information
