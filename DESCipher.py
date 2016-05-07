@@ -12,14 +12,11 @@ Required Files: Cipherinterface.py
 This class utilizes uses the CipherInterface class to perform
 encryption and decryption with the DES class from the pyCrpto library.
 
-
-
 To install pyCrypto on linux/Ubuntu :
   $pip install pycrypto
 """
 
 from Crypto.Cipher import DES
-from Crypto import Random 	                                # Will potentially be used with IV for other Block Cipher modes
 from CipherInterface import CipherInterface
 import string
 
@@ -29,15 +26,25 @@ class DESCipher (CipherInterface):
   # Default initialization
   def __init__(self):
     self._key = None
-    self._padFlag = 0                                       # Keep track of whether or not plaintext was padded before encryption; 0 = no, 1 = yes
 
   def setKey(self,key):
+    success = False
     if len(key) is 16 and all(char in string.hexdigits for char in key):  # Check that the key is 16 hexidecimal characters
-      key = str(bytearray.fromhex(key))                     # Change the key to a byte array (Crypto library requires 8 byte input)
-      self._key = key                                       # Set the encryption/decryption key
-      return True                                           # key is valid and successfully set
+      convertedKey = ''
+      try:
+        for i in range(0,16,2): # change every 2 hex digits to 1 character
+          iByte = int(key[i:i+2], 16)
+          convertedKey += chr(iByte)
+        success = True
+      except ValueError:
+        print "ERROR: error occured while converting 16 digit key to one 8 byte value"
+
+    if success and len(convertedKey) == 8: # key converted correctly
+      self._key = convertedKey                                       # Set the encryption/decryption key
     else:
-      return False                                          # key is invalid and rejected
+      print self._key
+      success = False
+    return success
 
   def encrypt(self,plaintext):
     DESkey = self._key                                      # Set the key
@@ -45,8 +52,6 @@ class DESCipher (CipherInterface):
     encipher = DES.new(DESkey)                              # Create new DES object with given key, which defaults to ECB mode
 		
     if len(plaintext) % DES.block_size is not 0:            # Check if the final plaintext block fits into 8 bytes (64 bits).
-      self._padFlag = 1;						                        # Set padFlag to 1, indicating that we are padding the plaintext.
-
       padLength = DES.block_size - (len(plaintext) % DES.block_size) # Calculate how many bytes must be padded
                                                             # Padding format used: 0's followed by number of padded bytes.
                                                             #   ex:   Last block of plaintext = "cat"

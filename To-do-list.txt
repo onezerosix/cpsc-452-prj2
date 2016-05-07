@@ -1,6 +1,6 @@
 To-Do List:
 
-1) Goffman version of converting hex string key (for DES in setKey function)
+1) RSA for extra large files (waiting on email from Gofman)
 2) CBC encrypt/decrypt for DES & RSA
 3) README
-4) Fix the driver to take extra arguments for CFB/CBC mode with error checking
+4) Fix the driver to take extra arguments for CBC mode with error checking

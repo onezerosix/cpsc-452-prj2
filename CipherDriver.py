@@ -4,10 +4,6 @@ Assignment 2
 Cipher Driver
 
 Python 2.7
-
-Modified 4/23/16: Eric Roe
-
-Updated to include DES and RSA cipher options.
 """
 
 import sys
@@ -40,75 +36,64 @@ def badUser(msg):
   sys.exit(-1)
 
 def main ( ):
-  # python CipherDriver.py <CIPHER NAME> <KEY> <ENC/DEC> <INPUTFILE> <OUTPUTFILE>
-  # python CipherDriver.py DESCBC <KEY> <ENC/DEC> <INPUTFILE> <OUTPUTFILE> <IV> # similar usage for DESCFB/RSACBC/RSACFB
-
   # check number of parameters
   if len(sys.argv) != 6 and len(sys.argv) != 7 and len(sys.argv) != 8:
     badUser("ERROR: incorrect number of parameters provided\ncheck README")
-  
+
   cipherName = sys.argv[1]                                  # <CIPHER NAME>
   key = sys.argv[2]                                         # <KEY>
   mode = sys.argv[3]                                        # <ENC/DEC>
   inputFile = sys.argv[4]                                   # <INPUTFILE>
   outputFile = sys.argv[5]                                  # <OUTPUTFILE>
 
-  # for CBC and CFB modes
+  # deeper check of number of parameters
   if cipherName in {"DESCBC", "RSACBC"}: # set of CBC mode ciphers
     if len(sys.argv) != 7:
-      badUser("ERROR: need to provide IV parameter for CBC/CFB\ncheck README")
+      badUser("ERROR: incorrect number of parameters for CBC\ncheck README")
     else:
       IV = sys.argv[6]
   elif cipherName in {"DESCFB", "RSACFB"}: # set of CFB mode ciphers
-    # TODO: implement later
-    IV = sys.argv[6]
-    s = int(sys.argv[7])
+    if len(sys.argv) != 8:
+      badUser("ERROR: incorrect number of parameters for CFB\ncheck README")
+    else:
+      IV = sys.argv[6]
+      try: # ensure s is an int
+        s = int(sys.argv[7])
+      except ValueError:
+        badUser("ERROR: s argument provided couldn't translate to a 10-base int\ncheck README")      
   elif len(sys.argv) != 6:
     badUser("ERROR: incorrect number of parameters for ECB\ncheck README")
 
   toConvert = readFile(inputFile)                           # attempt to read file
   
-  if cipherName == "DES":                                   # <CIPHER NAME> = DES --> DES Cipher
+  if cipherName in {"DES", "DESCBC", "DESCFB"}:
     cipher = DESCipher()                                       # Create an instance of the class
     if cipher.setKey(key) == False:                            # Attempt to set the key
       badUser("Invalid key for DES Cipher. Key must be 16 hexidecimal characters (0-9, a-f)!")
 
-  elif cipherName == "RSA":
-    cipher = RSACipher()                                       # <CIPHER NAME> = RSA --> RSA Cipher
+  elif cipherName in {"RSA", "RSACBC", "RSACFB"}:
+    cipher = RSACipher()
     if cipher.setKey(key) == False:                            # Attempt to set the key
-      #TODO: know key reqs
-      badUser("Invalid key for RSA Cipher. Key can only be ?")
-
-  elif cipherName == "DESCFB":
-    cipher = DESCipher()                                       # Create an instance of the class
-    if cipher.setKey(key) == False:                            # Attempt to set the key
-      badUser("Invalid key for DES Cipher. Key must be 16 hexidecimal characters (0-9, a-f)!")
-
-  elif cipherName == "RSACFB":
-    cipher = RSACipher()                                       # Create an instance of the class
-    if cipher.setKey(key) == False:                            # Attempt to set the key
-      #TODO: know key reqs
-      badUser("Invalid key for RSA Cipher. Key can only be ?")
+      badUser("Setting RSA key failed\ncheck README")
 
   else:                                                     # Invalid Cipher
-    badUser("Invalid <CIPHER NAME>, please use the following names:\
-            \n- DES: Data Encryption Standard\
-            \n- RSA: Row Transposition")
+    badUser("Invalid <CIPHER NAME>\ncheck README")
 
   if mode == "ENC":
     print("ENC: Encryption mode selected. Encrypting...")
     if cipherName in {"DESCBC", "RSACBC"}:
-      #TODO: implement
+      #TODO: implement CBC
       badUser("CBC not implemented yet")
     elif cipherName in {"DESCFB", "RSACFB"}:
       converted = encryptCFB(cipher, toConvert, IV, s)
     else:
       converted = cipher.encrypt(toConvert)                     # Encrypt and receive the ciphered text
     print("The ciphered text is: {}".format(converted))
+
   elif mode == "DEC":
     print("DEC: Decryption mode selected. Decrypting...")
     if cipherName in {"DESCBC", "RSACBC"}:
-      #TODO: implement
+      #TODO: implement CBC
       badUser("CBC not implemented yet")
     elif cipherName in {"DESCFB", "RSACFB"}:
       converted = decryptCFB(cipher, toConvert, IV, s)
@@ -116,7 +101,7 @@ def main ( ):
       converted = cipher.decrypt(toConvert)                   # Decrypt and receive the deciphered text
     print("The deciphered text is: {}".format(converted))
   else:
-    badUser("Error, please specify <ENC/DEC>")
+    badUser("ERROR: please specify <ENC/DEC>")
 
   writeFile(outputFile, converted)                            # print converted text
       
