@@ -36,6 +36,7 @@ def encryptCFB(cipher, plaintext, IV, s):
     cipherblock = ('0' * (s - len(cipherblock))) + cipherblock # prepend missing 0s if needed
     shiftreg = shiftreg[s:64] + cipherblock # shift SR and put cipherblock in
     ciphertext += cipherblock
+
   return binStrToStr(ciphertext)
 
 
@@ -43,10 +44,12 @@ def decryptCFB(cipher, ciphertext, IV, s):
   plaintext = ''
   shiftreg = strToBinStr(IV)
   ciphertext = strToBinStr(ciphertext)
-#  if len(ciphertext)%s != 0:
-#    ciphertext += '0' * (s - (len(ciphertext) % s))  # pad ciphertext if needed
 
-  for i in range(len(ciphertext) / s):  
+  # if ciphertext isn't divisible by s, s is wrong
+  if len(ciphertext)%s != 0:
+    print "WARNING: ciphertext doesn't fit correctly into blocks, this may cause errors"
+
+  for i in range(len(ciphertext) / s):
     temp = strToBinStr(cipher.encrypt(binStrToStr(shiftreg))) # encrypt shiftreg
 
     # xor s bits of SR with plaintext block, result is binStr (no '0b')
@@ -55,4 +58,5 @@ def decryptCFB(cipher, ciphertext, IV, s):
     plaintextblock = ('0' * (s - len(plaintextblock))) + plaintextblock # prepend missing 0s
     shiftreg = shiftreg[s:64] + ciphertext[i*s:(i+1)*s] # shift SR and put cipherblock in
     plaintext += plaintextblock
+
   return binStrToStr(plaintext)
