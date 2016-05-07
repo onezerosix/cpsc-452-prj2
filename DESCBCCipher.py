@@ -60,8 +60,8 @@ class DESCBCCipher (CipherInterface):
     padLength = DES.block_size - (len(plaintext) % DES.block_size) # Calculate how many bytes must be padded
 
     for i in range(padLength -1):                           # Append (padLength - 1) 0's to the plaintext.
-      plaintext += chr(0)
-    plaintext += chr(padLength)                             # Append number of bytes padded to end of plaintext (can hold values 1-7).
+      plaintext += chr(ord('0'))                            # Add 0 (character) as a pad
+    plaintext += chr(ord(str(padLength)))                   # Append number of bytes padded to end of plaintext (can be anywhere in range 1-7).
 
     return plaintext
 
@@ -72,51 +72,58 @@ class DESCBCCipher (CipherInterface):
     encipher = DES.new(DESCBCkey)                           # Create new DESCBC object with given key in CBC mode
     ciphertext = ""			                                    # ciphertext will hold the encrypted plaintext
 
-    IV_in_bits = strToBinStr(IV)
+    IV_in_bits = strToBinStr(IV)                            # Convert the IV from string to binary string (64 bits)
 
-    n = 8
-    plaintext_in_blocks = [plaintext[i:i+n] for i in range(0, len(plaintext), n)]  # Loop through plaintext and split in blocks of 8 bytes (64 bits)
+    n = 8                                                   # Use this value (8) to split the plaintext into blocks of 8 bytes
+    plaintext_in_blocks = [plaintext[i:i+n] for i in range(0, len(plaintext), n)] # Create a list of these plaintext blocks
 
-    #plaintext_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in plaintext_in_blocks[0])
-    plaintext_in_bits = strToBinStr(plaintext_in_blocks[0]) # Convert plaintext string to binary for xor
-    current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(IV_in_bits, 2))[2:]
-    current_block_xor = ("0" * (8 - (len(current_block_xor) % 8))) + current_block_xor # prepend missing 0s if needed 
-    first_block_str = binStrToStr(current_block_xor)
-   
-    cipher_block = encipher.encrypt(first_block_str)
-    ciphertext += cipher_block
+    plaintext_in_bits = strToBinStr(plaintext_in_blocks[0]) # Convert the first 8-byte plaintext block to 64-bit binary for xor
+    current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(IV_in_bits, 2))[2:] # xor the first block and the IV, cut off the '0b' at the front
+    if (len(current_block_xor) < 64):                       # Check if the binary string needs padding of 0's at the front    
+      current_block_xor = ("0" * (8 - (len(current_block_xor) % 8))) + current_block_xor # Prepend missing 0's if needed since the xor removes 0's in the front
+    
+    first_block_str = binStrToStr(current_block_xor)        # Convert the xored binary string to a string, which is now ready to be encrypted
+    cipher_block = encipher.encrypt(first_block_str)        # The first block has been processed and is encrypted here; keep this string for xoring
+    ciphertext += cipher_block                              # ciphertext keeps the total string combination of all cipher_blocks
 
-    for block in plaintext_in_blocks[1:]:                   # Loop through all blocks of plaintext except the first block
-      plaintext_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in block)
-      cipher_in_bits = strToBinStr(cipher_block)
-      current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(cipher_in_bits, 2))[2:]
-      current_block_str = binStrToStr(current_block_xor)
-      cipher_block = encipher.encrypt(current_block_str)
-      ciphertext += cipher_block
+    for block in plaintext_in_blocks[1:]:                   # Loop through all blocks of plaintext except the first block, which has already been done
+      plaintext_in_bits = strToBinStr(block)                # Convert the current block from string to binary
+      cipher_in_bits = strToBinStr(cipher_block)            # Convert the cipher_block from string to binary
+      current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(cipher_in_bits, 2))[2:] # xor the current block and the previous cipher_block, cut off the '0b' at the front
+      if (len(current_block_xor) < 64):                     # Check if the binary string needs padding of 0's at the front
+        current_block_xor = ("0" * (8 - (len(current_block_xor) % 8))) + current_block_xor # Prepend missing 0's if needed since the xor removes 0's in the front
+      current_block_str = binStrToStr(current_block_xor)    # Convert the xored binary string to a string, which is now ready to be encrypted
+      cipher_block = encipher.encrypt(current_block_str)    # The current block has been processed and is encrypted here; keep this string for xoring
+      ciphertext += cipher_block                            # Add the encrypted text to the ciphertext
 
-    return ciphertext
+    return ciphertext                                       # Return the completed ciphertext, which is our enciphered result
 
   def decrypt(self,ciphertext,IV): 
     DESCBCkey = self._key                                   # Set the key
     decipher = DES.new(DESCBCkey)                           # Create new DESCBC object with given key in CBC mode
     plaintext = ""									                        # plaintext will hold the decrypted ciphertext
 
-    n = 8
-    ciphertext_in_blocks = [decipher.decrypt(ciphertext[i:i+n]) for i in range(0, len(ciphertext), n)]
-    ciphertext_in_bits = strToBinStr(ciphertext_in_blocks[0])
+    n = 8                                                   # Use this value (8) to split the ciphertext into blocks of 8 bytes
+    ciphertext_in_blocks = [ciphertext[i:i+n] for i in range(0, len(ciphertext), n)] # Create a list of these ciphertext blocks
 
+    ciphertext_decrypted = decipher.decrypt(ciphertext_in_blocks[0]) # Decrypt the first ciphertext block
+    ciphertext_in_bits = strToBinStr(ciphertext_decrypted)  # Convert this decrypted ciphertext block from string into binary
+    
+    IV_in_bits = strToBinStr(IV)                            # Convert the IV from string to binary
+    current_block_xor = bin(int(ciphertext_in_bits, 2) ^ int(IV_in_bits, 2))[2:] # xor the first ciphertext_in_bits and the IV_in_bits
+    if (len(current_block_xor) < 64):                       # Check if the binary string needs padding of 0's at the front
+      current_block_xor = ("0" * (8 - (len(current_block_xor) % 8))) + current_block_xor # Prepend missing 0's if needed since the xor removes 0's in the front
+    plaintext += binStrToStr(current_block_xor)             # Convert the xored block result from binary to string, and append to the plaintext
 
-    #TODO: currently does not work.
-    IV_in_bits = strToBinStr(IV)
-
-    xored = bin(int(ciphertext_in_bits, 2) ^ int(IV_in_bits, 2))[2:]
-    print(xored)
-
-    xored_str = binStrToStr(xored)
-
-    print(xored_str)
-
-    #plaintext = decipher.decrypt(ciphertext)			          # Decrypt the ciphertext and store it in the plaintext string
-		
-    return plaintext                                        # Return the plaintext, which is our deciphered result
-
+    i = 0                                                   # Keep track of the previous ciphertext block
+    for block in ciphertext_in_blocks[1:]:                  # Loop through all blocks of plaintext except the first block, which has already been done
+      ciphertext_decrypted = decipher.decrypt(block)        # Decrypt the current block
+      ciphertext_in_bits = strToBinStr(ciphertext_decrypted)# Convert the current decrypted ciphertext from string to binary 
+      prev_ciphertext_in_bits = strToBinStr(ciphertext_in_blocks[i]) # Convert the previous ciphertext from string to binary
+      current_block_xor = bin(int(ciphertext_in_bits, 2) ^ int(prev_ciphertext_in_bits, 2))[2:] # xor the current decrypted ciphertext and the previous ciphertext block
+      if (len(current_block_xor) < 64):                     # Check if the binary string needs padding of 0's at the front
+        current_block_xor = ("0" * (8 - (len(current_block_xor) % 8))) + current_block_xor # Prepend missing 0's if needed since the xor removes 0's in the front
+      plaintext += binStrToStr(current_block_xor)           # Convert the xored block result from binary to string, and append to the plaintext
+      i += 1                                                # Increase the counter to go to the next ciphertext block.
+      
+    return plaintext                                        # Return the completed plaintext, which is our deciphered result
