@@ -1,0 +1,69 @@
+'''
+  IV is going to be an 8 character string
+  example of binary string: '100111010101010' (any length)
+  example of string: 'k12lk~!^&HDF(*lkj*DSF(9.,'
+  
+  example runs
+  python CipherDriver.py DESCBC 1234567890abcdef ENC long.txt out.txt 01234567
+  python CipherDriver.py DESCBC 1234567890abcdef DEC out.txt out2.txt 01234567
+  python CipherDriver.py RSACBC pubkey.pem ENC long.txt out.txt 01234567
+  python CipherDriver.py RSACBC privkey.pem DEC out.txt out2.txt 01234567
+'''
+from DESCipher import DESCipher
+from RSACipher import RSACipher
+
+def strToBinStr(myS): # translate a string to a binary string
+  myL = []
+  for i in range(len(myS)):
+    x = bin(ord(myS[i]))[2:] # i-th char in myS to int to binary & strip '0b' (gets a binary string)
+    x = ('0' * (8 - len(x))) + x # prepend missing 0s if needed
+    myL.append(x)
+  return ''.join(myL)
+  
+def binStrToStr(myB): # undo strToBinStr - translate binary string to regular string
+  myS = ''
+  for i in range(0, len(myB), 8): # translate 8 bits at a time
+    myS += chr(int(myB[i:i+8], 2))
+  return myS
+
+def encryptCBC(cipher, plaintext, IV, n): # IV will be n bytes hence plaintext and ciphertext blocks will be n bytes
+  ciphertext = ""			                                    # ciphertext will hold the encrypted plaintext
+  cipher_block = IV                                       # initialize variable with IV in bits
+  
+  if len(plaintext)%n != 0: # pad plaintext if needed
+    plaintext += '0' * (n - (len(plaintext)%n))
+    
+  plaintext_in_blocks = [plaintext[i:i+n] for i in range(0, len(plaintext), n)]  # Loop through plaintext and split in blocks of 8 bytes (64 bits)
+  
+  for block in plaintext_in_blocks:
+    plaintext_in_bits = strToBinStr(block)
+    cipher_in_bits = strToBinStr(cipher_block) # Convert string to binary for xor
+    current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(cipher_in_bits, 2))[2:]
+    current_block_xor = ("0" * (n*8 - len(current_block_xor))) + current_block_xor # prepend missing 0s if needed 
+    current_block_str = binStrToStr(current_block_xor)
+    cipher_block = cipher.encrypt(current_block_str)
+    ciphertext += cipher_block
+  return ciphertext
+
+def decryptCBC(cipher, ciphertext, IV, n): # IV will be n bytes hence plaintext and ciphertext blocks will be n bytes
+  plaintext = ""			                                   # plaintext will hold the decrypted ciphertext
+  prev_cipher_block = IV                                 # initialize variable with IV in bits
+  
+  # if ciphertext isn't divisible by n, n is wrong
+  if len(ciphertext)%n != 0:
+    print "WARNING: ciphertext doesn't fit correctly into blocks, this may cause errors"
+    
+  ciphertext_in_blocks = [ciphertext[i:i+n] for i in range(0, len(ciphertext), n)]  # Loop through ciphertext and split in blocks of n bytes
+  
+  for block in ciphertext_in_blocks:
+    decrypted_block = cipher.decrypt(block)
+    if len(block) != len(decrypted_block):
+      print "WARNING: size of block after decryption has changed"
+    decrypted_in_bits = strToBinStr(decrypted_block)
+    prev_cipher_bits = strToBinStr(prev_cipher_block)
+    current_block_xor = bin(int(decrypted_in_bits, 2) ^ int(prev_cipher_bits, 2))[2:]
+    current_block_xor = ("0" * (n*8 - len(current_block_xor))) + current_block_xor # prepend missing 0s if needed 
+    plain_block = binStrToStr(current_block_xor)
+    prev_cipher_block = block
+    plaintext += plain_block
+  return plaintext

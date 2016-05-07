@@ -1,7 +1,15 @@
-# IV is going to be an 8 character string
-# s is int in terms of bits
-# example of binary string: '100111010101010' (any length)
-# example of string: 'k12lk~!^&HDF(*lkj*DSF(9.,'
+'''
+  IV is going to be an 8 character string
+  s is int in terms of bits
+  example of binary string: '100111010101010' (any length)
+  example of string: 'k12lk~!^&HDF(*lkj*DSF(9.,'
+  
+  example runs:
+  python CipherDriver.py DESCFB 1234567890abcdef ENC long.txt out.txt 01234567 3
+  python CipherDriver.py DESCFB 1234567890abcdef DEC out.txt out2.txt 01234567 3
+  python CipherDriver.py RSACFB pubkey.pem ENC big.txt out.txt iviviviv 10
+  python CipherDriver.py RSACFB privkey.pem DEC out.txt out2.txt iviviviv 10
+'''
 
 from DESCipher import DESCipher
 from RSACipher import RSACipher
