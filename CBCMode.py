@@ -27,8 +27,8 @@ def binStrToStr(myB): # undo strToBinStr - translate binary string to regular st
   return myS
 
 def encryptCBC(cipher, plaintext, IV, n): # IV will be n bytes hence plaintext and ciphertext blocks will be n bytes
-  ciphertext = ""			                                    # ciphertext will hold the encrypted plaintext
-  cipher_block = IV                                       # initialize variable with IV in bits
+  ciphertext = ""	# ciphertext will hold the encrypted plaintext
+  cipher_block = IV # initialize variable with IV in bits
   
   if len(plaintext)%n != 0: # pad plaintext if needed
     plaintext += '0' * (n - (len(plaintext)%n)) # pad with as many 0's as it requires for the last block to become 8 bytes
@@ -46,8 +46,8 @@ def encryptCBC(cipher, plaintext, IV, n): # IV will be n bytes hence plaintext a
   return ciphertext
 
 def decryptCBC(cipher, ciphertext, IV, n): # IV will be n bytes hence plaintext and ciphertext blocks will be n bytes
-  plaintext = ""			                                   # plaintext will hold the decrypted ciphertext
-  prev_cipher_block = IV                                 # initialize variable with IV in bits
+  plaintext = "" # plaintext will hold the decrypted ciphertext
+  prev_cipher_block = IV # initialize variable with IV in bits
   
   # if ciphertext isn't divisible by n, n is wrong
   if len(ciphertext)%n != 0:
