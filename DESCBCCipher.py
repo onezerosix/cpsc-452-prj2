@@ -53,21 +53,17 @@ class DESCBCCipher (CipherInterface):
     else:
       return False                                          # key is invalid and rejected
 
+  # Padding format used: 0's followed by number of padded bytes.
+  #   ex:   Last block of plaintext = "cat"
+  #         Padded = "cat00005"
   def pad(self,plaintext):
     padLength = DES.block_size - (len(plaintext) % DES.block_size) # Calculate how many bytes must be padded
-                                                            # Padding format used: 0's followed by number of padded bytes.
-                                                            #   ex:   Last block of plaintext = "cat"
-                                                            #         Padded = "cat00005"
+
     for i in range(padLength -1):                           # Append (padLength - 1) 0's to the plaintext.
       plaintext += chr(0)
     plaintext += chr(padLength)                             # Append number of bytes padded to end of plaintext (can hold values 1-7).
 
     return plaintext
-
-
-
-
-
 
   def encrypt(self,plaintext,IV):
     if len(plaintext) % DES.block_size is not 0:            # Check if the final plaintext block fits into 8 bytes (64 bits).
@@ -76,80 +72,51 @@ class DESCBCCipher (CipherInterface):
     encipher = DES.new(DESCBCkey)                           # Create new DESCBC object with given key in CBC mode
     ciphertext = ""			                                    # ciphertext will hold the encrypted plaintext
 
-    #print("IV: {}".format(IV))
-
-    #IV_ready2 = str(bytearray.fromhex(IV))
-    #IV_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in IV_ready2) # Convert plaintext string to binary for xor
-
-    IV_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in IV)
-
     IV_in_bits = strToBinStr(IV)
 
-    #print("IV_in_bits:\n{}".format(IV_in_bits))
-    #print("IV_in_bits SIZE: {}".format(len(IV_in_bits)))
-
     n = 8
-    plaintext_in_parts = [plaintext[i:i+n] for i in range(0, len(plaintext), n)]
+    plaintext_in_blocks = [plaintext[i:i+n] for i in range(0, len(plaintext), n)]  # Loop through plaintext and split in blocks of 8 bytes (64 bits)
 
-    #ciphertext += encipher.encrypt(first_block)
-    plaintext_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in plaintext_in_parts[0]) # Convert plaintext string to binary for xor
+    #plaintext_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in plaintext_in_blocks[0])
+    plaintext_in_bits = strToBinStr(plaintext_in_blocks[0]) # Convert plaintext string to binary for xor
+    current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(IV_in_bits, 2))[2:]
+    current_block_xor = ("0" * (8 - (len(current_block_xor) % 8))) + current_block_xor # prepend missing 0s if needed 
+    first_block_str = binStrToStr(current_block_xor)
+   
+    cipher_block = encipher.encrypt(first_block_str)
+    ciphertext += cipher_block
 
-    #print("plaintext_in_bits:\n{}".format(plaintext_in_bits))
-    plaintext_back = binStrToStr(plaintext_in_bits)
+    for block in plaintext_in_blocks[1:]:                   # Loop through all blocks of plaintext except the first block
+      plaintext_in_bits = ''.join('{0:08b}'.format(ord(x), 'b') for x in block)
+      cipher_in_bits = strToBinStr(cipher_block)
+      current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(cipher_in_bits, 2))[2:]
+      current_block_str = binStrToStr(current_block_xor)
+      cipher_block = encipher.encrypt(current_block_str)
+      ciphertext += cipher_block
 
-    #print("plaintext_back: {}".format(plaintext_back))
-
-    first_block = bin(int(plaintext_in_bits, 2) ^ int(IV_in_bits, 2))[2:]
-    first_block = ("0" * (8 - (len(first_block) % 8))) + first_block # prepend missing 0s if needed 
-    #print("RESULT:\n{}".format(first_block))
-
-    first_block_str = binStrToStr(first_block)
-    #print("RESULT 2:\n{}".format(first_block_str))
-    #for block in plaintext_in_parts:
-    #  print(block)
-
-    #TODO: After the xor, encrypt the data. Convert it back to a non-binary format.
-    #TODO: Loop through all parts of the plaintext instead of just the first block.
-
-    return 0
-    #ciphertext += encipher.encrypt(plaintext)               # Encrypt the plaintext and store it in the ciphertext string
-
-    #return ciphertext                                       # Return the ciphertext, which is our enciphered result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return ciphertext
 
   def decrypt(self,ciphertext,IV): 
     DESCBCkey = self._key                                   # Set the key
-    descipher = DES.new(DESCBCkey)                           # Create new DESCBC object with given key in CBC mode
+    decipher = DES.new(DESCBCkey)                           # Create new DESCBC object with given key in CBC mode
     plaintext = ""									                        # plaintext will hold the decrypted ciphertext
 
-    
+    n = 8
+    ciphertext_in_blocks = [decipher.decrypt(ciphertext[i:i+n]) for i in range(0, len(ciphertext), n)]
+    ciphertext_in_bits = strToBinStr(ciphertext_in_blocks[0])
 
-    plaintext = decipher.decrypt(ciphertext)			          # Decrypt the ciphertext and store it in the plaintext string
+
+    #TODO: currently does not work.
+    IV_in_bits = strToBinStr(IV)
+
+    xored = bin(int(ciphertext_in_bits, 2) ^ int(IV_in_bits, 2))[2:]
+    print(xored)
+
+    xored_str = binStrToStr(xored)
+
+    print(xored_str)
+
+    #plaintext = decipher.decrypt(ciphertext)			          # Decrypt the ciphertext and store it in the plaintext string
 		
     return plaintext                                        # Return the plaintext, which is our deciphered result
-
-
-def encryptCFB(cipher, plaintext, IV, s):
-  #TODO: ALL (will be working on it tomorrow during a 3 hr break)
-  ciphertext = '' 
-  shiftreg = strToBinStr(IV)
-  #print shiftreg, " and it's type is ", type(shiftreg)
-  plaintext = strToBinStr(plaintext)
 
