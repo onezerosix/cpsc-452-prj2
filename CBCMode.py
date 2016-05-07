@@ -31,18 +31,18 @@ def encryptCBC(cipher, plaintext, IV, n): # IV will be n bytes hence plaintext a
   cipher_block = IV                                       # initialize variable with IV in bits
   
   if len(plaintext)%n != 0: # pad plaintext if needed
-    plaintext += '0' * (n - (len(plaintext)%n))
+    plaintext += '0' * (n - (len(plaintext)%n)) # pad with as many 0's as it requires for the last block to become 8 bytes
     
   plaintext_in_blocks = [plaintext[i:i+n] for i in range(0, len(plaintext), n)]  # Loop through plaintext and split in blocks of 8 bytes (64 bits)
   
-  for block in plaintext_in_blocks:
-    plaintext_in_bits = strToBinStr(block)
-    cipher_in_bits = strToBinStr(cipher_block) # Convert string to binary for xor
-    current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(cipher_in_bits, 2))[2:]
-    current_block_xor = ("0" * (n*8 - len(current_block_xor))) + current_block_xor # prepend missing 0s if needed 
-    current_block_str = binStrToStr(current_block_xor)
-    cipher_block = cipher.encrypt(current_block_str)
-    ciphertext += cipher_block
+  for block in plaintext_in_blocks: # Loop through all the blocks (8 bytes each) in the plaintext
+    plaintext_in_bits = strToBinStr(block) # Convert the current block from string to binary for xor
+    cipher_in_bits = strToBinStr(cipher_block) # Convert the previous cipher block from string to binary for xor
+    current_block_xor = bin(int(plaintext_in_bits, 2) ^ int(cipher_in_bits, 2))[2:] # xor the plaintext and previous cipher block
+    current_block_xor = ("0" * (n*8 - len(current_block_xor))) + current_block_xor # prepend missing 0's if needed 
+    current_block_str = binStrToStr(current_block_xor) # Convert the xored result from binary to string
+    cipher_block = cipher.encrypt(current_block_str) # The current block has been processed and is encrypted here
+    ciphertext += cipher_block # Add this block to the ciphertext
   return ciphertext
 
 def decryptCBC(cipher, ciphertext, IV, n): # IV will be n bytes hence plaintext and ciphertext blocks will be n bytes
@@ -51,19 +51,19 @@ def decryptCBC(cipher, ciphertext, IV, n): # IV will be n bytes hence plaintext 
   
   # if ciphertext isn't divisible by n, n is wrong
   if len(ciphertext)%n != 0:
-    print "WARNING: ciphertext doesn't fit correctly into blocks, this may cause errors"
+    print "WARNING: ciphertext doesn't fit correctly into blocks, this may cause errors."
     
   ciphertext_in_blocks = [ciphertext[i:i+n] for i in range(0, len(ciphertext), n)]  # Loop through ciphertext and split in blocks of n bytes
   
-  for block in ciphertext_in_blocks:
-    decrypted_block = cipher.decrypt(block)
+  for block in ciphertext_in_blocks: # Loop through all the blocks (8 bytes each) in the ciphertext
+    decrypted_block = cipher.decrypt(block) # Decrypt the current block
     if len(block) != len(decrypted_block):
-      print "WARNING: size of block after decryption has changed"
-    decrypted_in_bits = strToBinStr(decrypted_block)
-    prev_cipher_bits = strToBinStr(prev_cipher_block)
-    current_block_xor = bin(int(decrypted_in_bits, 2) ^ int(prev_cipher_bits, 2))[2:]
-    current_block_xor = ("0" * (n*8 - len(current_block_xor))) + current_block_xor # prepend missing 0s if needed 
-    plain_block = binStrToStr(current_block_xor)
-    prev_cipher_block = block
-    plaintext += plain_block
+      print "WARNING: size of block after decryption has changed."
+    decrypted_in_bits = strToBinStr(decrypted_block) # Convert the current block from string to binary
+    prev_cipher_bits = strToBinStr(prev_cipher_block) # Convert the previous cipher block from string to binary
+    current_block_xor = bin(int(decrypted_in_bits, 2) ^ int(prev_cipher_bits, 2))[2:] # xor the decrypted ciphertext with the previous ciphertext
+    current_block_xor = ("0" * (n*8 - len(current_block_xor))) + current_block_xor # prepend missing 0's if needed 
+    plain_block = binStrToStr(current_block_xor) # Convert the xored result from binary to string
+    prev_cipher_block = block # Set the previous cipherblock to the current ciphertext block
+    plaintext += plain_block # Add this block to the plaintext
   return plaintext
