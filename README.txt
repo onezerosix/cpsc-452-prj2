@@ -40,25 +40,40 @@ Pycrypto was used in both implementations, install using:
 
 How to execute the program in the terminal:
 
-    python CipherDriver.py <CIPHER NAME> <KEY> <ENC/DEC> <INPUTFILE> <OUTPUT FILE> {<IV>}
+    python CipherDriver.py <CIPHER NAME> <KEY> <ENC/DEC> <INPUTFILE> <OUTPUT FILE> {<IV>} {<SBits>}
     
-    - IV is optional depending on the cipher
+    - IV is necessary when using CBC or CFB modes
+    - SBits is necessary when using CFB mode. 
     
-The following execution code was used before sending in the tar:
-  DES Cipher:
-    python CipherDriver.py VIG security ENC plainInput.txt encOutput.txt
-    python CipherDriver.py VIG security DEC encOutput.txt encOutput.txt
+Extra Credit:
+Our group implemented the extra credit for the DES Cipher. We also included CBC and CFB modes for the RSA Cipher for additional extra credit points as discussed after class on 5/2/26. 
+
+
+The following executions were tested where plaintext.txt was replaced with either in.txt or long.txt:
+
+  DES Cipher (@params - CIPHER NAME, KEY, ENC/DEC, INPUTFILE, OUTPUTFILE):
+    python CipherDriver.py DES 1234567890abcdef ENC plaintext.txt DESenc.txt
+    python CipherDriver.py DES 1234567890abcdef DEC DESenc.txt DESdec.txt
+
+  RSA Cipher (@params - CIPHER NAME, PUBLICKEY/PRIVATEKEY, ENC/DEC, INPUTFILE, OUTPUTFILE):
+    python CipherDriver.py RSA pubkey.pem ENC plaintext.txt RSAenc.txt
+    python CipherDriver.py RSA privkey.pem DEC RSAenc.txt RSAdec.txt
   
-  RSA Cipher:
-    python CipherDriver.py RSA pubkey.pem ENC in.txt ciphered.txt
-    python CipherDriver.py RSA privkey.pem DEC ciphered.txt deciphered.txt
+  DES Cipher - CBC mode (@params - CIPHER NAME, KEY, ENC/DEC, INPUTFILE, OUTPUTFILE, IV):
+    python CipherDriver.py DESCBC 0123456789abcdef ENC plaintext.txt DESCBCenc.txt abcdef12
+    python CipherDriver.py DESCBC 0123456789abcdef DEC DESCBCenc.txt DESCBCdec.txt abcdef12
+
+  DES Cipher - CFB mode (@params - CIPHER NAME, KEY, ENC/DEC, INPUTFILE , OUTPUTFILE , IV, sBitSelection):
+    python CipherDriver.py DESCFB 1234567890abcdef ENC plaintext.txt DESCFBenc.txt 01234567 57
+    python CipherDriver.py DESCFB 1234567890abcdef DEC DESCFBenc.txt DESCFBdec.txt 01234567 57
+
+  RSA Cipher - CBC mode (@params - CIPHER NAME, PUBLICKEY/PRIVATEKEY, ENC/DEC, INPUTFILE, OUTPUTFILE, IV):
+    python CipherDriver.py RSACBC pubkey.pem ENC plaintext.txt RSACBCenc.txt 01234567
+    python CipherDriver.py RSACBC privkey.pem DEC RSACBCenc.txt RSACBCdec.txt 01234567
   
-  DES CFB/CBC:
-    python CipherDriver.py DESCBC 0123456789abcdef ENC in.txt descbcEnciphered.txt abcdef12
-    python CipherDriver.py DESCBC 0123456789abcdef DEC descbcEnciphered.txt descbcDeciphered.txt abcdef12
-  
-  RSA CFB/CBC:
-    - todo
+  RSA Cipher- CFB mode (@params - CIPHER NAME, PUBLICKEY/PRIVATEKEY, ENC/DEC, INPUTFILE , OUTPUTFILE , IV, sBitSelection):
+    python CipherDriver.py RSACFB pubkey.pem ENC plaintext.txt RSACFBenc.txt 01234567 30
+    python CipherDriver.py RSACFB privkey.pem DEC RSACFBenc.txt RSACFBdec.txt 01234567 30
 
 • CIPHER NAME: Is the name of the cipher. Valid names are:
 - DES: Data encryption standard
