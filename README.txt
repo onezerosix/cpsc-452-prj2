@@ -46,7 +46,9 @@ How to execute the program in the terminal:
     - SBits is necessary when using CFB mode. 
     
 Extra Credit:
-Our group implemented the extra credit for the DES Cipher. We also included CBC and CFB modes for the RSA Cipher for additional extra credit points as discussed after class on 5/2/26. 
+Our group implemented the extra credit for the DES Cipher. 
+We also implemented CBC and CFB modes for the RSA Cipher for additional extra credit 
+as discussed after class on 5/2/26. 
 
 
 The following executions were tested where plaintext.txt was replaced with either in.txt or long.txt:
