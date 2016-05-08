@@ -1,6 +1,0 @@
-To-Do List:
-
-1) RSA for extra large files (waiting on email from Gofman)
-2) CBC encrypt/decrypt for DES & RSA
-3) README
-4) Fix the driver to take extra arguments for CBC mode with error checking
