@@ -8,7 +8,7 @@ Huy Le            hqle@csu.fullerton.edu
 Sahar Ghanei      sghanei@csu.fullerton.edu
 Joshua Womack     emailwomack@gmail.com
 
-Programming Language: Python, tabs converted to spaces with 2 spaces per indentation
+Programming Language: Python 2.7, tabs converted to spaces with 2 spaces per indentation
 
 Filename:               Description:
   README.txt                The current file with instructions and other information
@@ -17,10 +17,9 @@ Filename:               Description:
   CipherInterface.py        The base class used in the cipher classes
   DESCipher.py              The DES Cipher implementation class
   RSACipher.py              The RSA Cipher implementation class
-  DESCFBCipher.py           The DES Cipher implementation class with CFB mode
-  DESCBCCipher.py           The DES Cipher implementation class with CBC mode
-  RSACFBCipher.py           The RSA Cipher implementation class with CFB mode
-  RSACBCCipher.py           The RSA Cipher implementation class with CBC mode
+  CBCMode.py                Generalized CBC implementation (does not work with RSA)
+  CFBMode.py                Generalized CFB implementation (works with RSA)de
+  binaryStrings.py          Functions to help convert strings to binary strings and vice versa
   
 Extra Files:
   in.txt            Example text input file
@@ -34,6 +33,8 @@ No makefile is necessary, just run the command in the terminal with all of the f
 Assumptions:
 - The file is in a readable format and encoded using UTF-8.
 - After an encrypted file is decrypted, the user will manually remove the padding if desired.
+- For RSA: key provided can process 256 byte blocks
+- For RSA: valid public key is used for encryption and valid private key is used decryption
 
 Pycrypto was used in both implementations, install using:
   $pip install pycrypto
@@ -47,8 +48,8 @@ How to execute the program in the terminal:
     
 Extra Credit:
 Our group implemented the extra credit for the DES Cipher. 
-We also implemented CBC and CFB modes for the RSA Cipher for additional extra credit 
-as discussed after class on 5/2/26. 
+We also implemented CFB mode for the RSA Cipher for additional extra credit. CBC mode for RSA is
+incomplete as discussed after class on 5/2/26. 
 
 
 The following executions were tested where plaintext.txt was replaced with either in.txt or long.txt:
@@ -83,10 +84,11 @@ The following executions were tested where plaintext.txt was replaced with eithe
 - DESCBC: DES using CBC mode
 - RSA: RSA algorithm
 - RSACFB: RSA using CFB mode
-- RSACBC: RSA using CBC mode
+- RSACBC: RSA using CBC mode - incomplete and may fail
 
 • KEY: the encryption key to use, for RSA it is the name of the .pem key file
 • ENC/DEC: whether to encrypt or decrypt, respectively.
 • INPUT FILE: the file from which to read the input.
 • OUTPUT FILE: the file to which the output shall be written.
-
+• IV: 8 character initializaiton vector [for CBC and CFB modes]
+• SBits: integer from 1 to 64 [for CFB mode]

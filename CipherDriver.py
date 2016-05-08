@@ -5,46 +5,38 @@ Cipher Driver
 
 Python 2.7
 
-CFB is slow
+CFB is slow for large files
 
-run long files:
-python CipherDriver.py DES 1234567890abcdef ENC long.txt des.enc
-python CipherDriver.py DES 1234567890abcdef DEC des.enc des.dec
-python CipherDriver.py RSA pubkey.pem ENC long.txt rsa.enc
-python CipherDriver.py RSA privkey.pem DEC rsa.enc rsa.dec
-python CipherDriver.py DESCBC 1234567890abcdef ENC long.txt descbc.enc 01234567
-python CipherDriver.py DESCBC 1234567890abcdef DEC descbc.enc descbc.dec 01234567
-python CipherDriver.py RSACBC pubkey.pem ENC long.txt rsacbc.enc 01234567
-python CipherDriver.py RSACBC privkey.pem DEC rsacbc.enc rsacbc.dec 01234567
-python CipherDriver.py DESCFB 1234567890abcdef ENC long.txt descfb.enc 01234567 57
-python CipherDriver.py DESCFB 1234567890abcdef DEC descfb.enc descfb.dec 01234567 57
-python CipherDriver.py RSACFB pubkey.pem ENC long.txt rsacfb.enc iviviviv 30
-python CipherDriver.py RSACFB privkey.pem DEC rsacfb.enc rsacfb.dec iviviviv 30
+run long file:
+python CipherDriver.py DES 1234567890abcdef ENC long.txt des.enc;
+python CipherDriver.py DES 1234567890abcdef DEC des.enc des.dec;
+python CipherDriver.py RSA pubkey.pem ENC long.txt rsa.enc;
+python CipherDriver.py RSA privkey.pem DEC rsa.enc rsa.dec;
+python CipherDriver.py DESCBC 1234567890abcdef ENC long.txt descbc.enc 01234567;
+python CipherDriver.py DESCBC 1234567890abcdef DEC descbc.enc descbc.dec 01234567;
+python CipherDriver.py RSACBC pubkey.pem ENC long.txt rsacbc.enc 01234567;
+python CipherDriver.py RSACBC privkey.pem DEC rsacbc.enc rsacbc.dec 01234567;
+python CipherDriver.py DESCFB 1234567890abcdef ENC long.txt descfb.enc 01234567 57;
+python CipherDriver.py DESCFB 1234567890abcdef DEC descfb.enc descfb.dec 01234567 57;
+python CipherDriver.py RSACFB pubkey.pem ENC long.txt rsacfb.enc iviviviv 33;
+python CipherDriver.py RSACFB privkey.pem DEC rsacfb.enc rsacfb.dec iviviviv 33;
 
-run short files:
-python CipherDriver.py DES 1234567890abcdef ENC in.txt des.enc
-python CipherDriver.py DES 1234567890abcdef DEC des.enc des.dec
-python CipherDriver.py RSA pubkey.pem ENC in.txt rsa.enc
-python CipherDriver.py RSA privkey.pem DEC rsa.enc rsa.dec
-python CipherDriver.py DESCBC 1234567890abcdef ENC in.txt descbc.enc 01234567
-python CipherDriver.py DESCBC 1234567890abcdef DEC descbc.enc descbc.dec 01234567
-python CipherDriver.py RSACBC pubkey.pem ENC in.txt rsacbc.enc 01234567
-python CipherDriver.py RSACBC privkey.pem DEC rsacbc.enc rsacbc.dec 01234567
-python CipherDriver.py DESCFB 1234567890abcdef ENC in.txt descfb.enc 01234567 3
-python CipherDriver.py DESCFB 1234567890abcdef DEC descfb.enc descfb.dec 01234567 3
-python CipherDriver.py RSACFB pubkey.pem ENC in.txt rsacfb.enc iviviviv 30
-python CipherDriver.py RSACFB privkey.pem DEC rsacfb.enc rsacfb.dec iviviviv 30
+run short file:
+python CipherDriver.py DES 1234567890abcdef ENC in.txt des.enc;
+python CipherDriver.py DES 1234567890abcdef DEC des.enc des.dec;
+python CipherDriver.py RSA pubkey.pem ENC in.txt rsa.enc;
+python CipherDriver.py RSA privkey.pem DEC rsa.enc rsa.dec;
+python CipherDriver.py DESCBC 1234567890abcdef ENC in.txt descbc.enc 01234567;
+python CipherDriver.py DESCBC 1234567890abcdef DEC descbc.enc descbc.dec 01234567;
+python CipherDriver.py RSACBC pubkey.pem ENC in.txt rsacbc.enc 01234567;
+python CipherDriver.py RSACBC privkey.pem DEC rsacbc.enc rsacbc.dec 01234567;
+python CipherDriver.py DESCFB 1234567890abcdef ENC in.txt descfb.enc 01234567 57;
+python CipherDriver.py DESCFB 1234567890abcdef DEC descfb.enc descfb.dec 01234567 57;
+python CipherDriver.py RSACFB pubkey.pem ENC in.txt rsacfb.enc iviviviv 45;
+python CipherDriver.py RSACFB privkey.pem DEC rsacfb.enc rsacfb.dec iviviviv 45;
 
-remove .enc files:
-rm *.enc
+broken: DESCBC RSACBC (rsa decrypt line 53 int argument results in ''
 
-testing: short, long (0 is untested, 1 is passed)
-DES:    1, 1
-DESCBC: 1, 1
-DESCFB: 1, weird padding & WARNING ABOUT FITTING BLOCKS
-RSA:    1, 1
-RSACBC: too much padding, ENCRYPTION FAILED - couldn't process a block
-RSACFB: weird padding, weird padding & WARNING ABOUT FITTING BLOCKS
 """
 
 import sys
@@ -53,6 +45,7 @@ from DESCipher import DESCipher
 from RSACipher import RSACipher
 from CFBMode import *
 from CBCMode import *
+from binaryStrings import *
 
 # Attempt to read the content of the specified filename
 def readFile(fileName):     
@@ -94,7 +87,7 @@ def main ( ):
     elif len(sys.argv[6]) != 8:
       badUser("ERROR: IV isn't 8 characters\ncheck README")
     else:
-      IV = sys.argv[6]
+      IV = sys.argv[6] # TODO: 8 character string
   elif cipherName in {"DESCFB", "RSACFB"}: # set of CFB mode ciphers
     if len(sys.argv) != 8:
       badUser("ERROR: incorrect number of parameters for CFB\ncheck README")
@@ -103,7 +96,7 @@ def main ( ):
     else:
       IV = sys.argv[6]
       try: # ensure s is an int
-        s = int(sys.argv[7])
+        s = int(sys.argv[7]) #TODO check that it's between 1 and 64
       except ValueError:
         badUser("ERROR: s argument provided couldn't translate to a 10-base int\ncheck README")      
   elif len(sys.argv) != 6:
@@ -128,11 +121,13 @@ def main ( ):
     print("ENC: Encryption mode selected. Encrypting...")
     if cipherName in {"DESCBC", "RSACBC"}:
       if cipherName == "DESCBC":
-        n = 8
+        n = 64
       else:
-        n = (cipher._key.size()/8)+1 # maximum size of text that the key can handle in bytes
+        n = cipher._key.size() # maximum size of text that the key can handle in bits
+        IV = strToBinStr(IV)
         IV += IV * (n - len(IV)) # duplicate IV to fit n
         IV = IV[:n] # cut off the extra characters
+        IV = strToBinStr(IV)
       converted = encryptCBC(cipher, toConvert, IV, n)
     elif cipherName in {"DESCFB", "RSACFB"}:
       converted = encryptCFB(cipher, toConvert, IV, s)
@@ -144,11 +139,13 @@ def main ( ):
     print("DEC: Decryption mode selected. Decrypting...")
     if cipherName in {"DESCBC", "RSACBC"}:
       if cipherName == "DESCBC":
-        n = 8
+        n = 64
       else:
-        n = 256#(cipher._key.size()/8)+1 # maximum size of text that the key can handle in bytes
+        n = cipher._key.size() # maximum size of text that the key can handle in bits
+        IV = strToBinStr(IV)
         IV += IV * (n - len(IV)) # duplicate IV to fit n
         IV = IV[:n] # cut off the extra characters
+        IV = strToBinStr(IV)
       converted = decryptCBC(cipher, toConvert, IV, n)
     elif cipherName in {"DESCFB", "RSACFB"}:
       converted = decryptCFB(cipher, toConvert, IV, s)

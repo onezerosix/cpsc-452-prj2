@@ -7,26 +7,13 @@
   example runs:
   python CipherDriver.py DESCFB 1234567890abcdef ENC long.txt out.txt 01234567 3
   python CipherDriver.py DESCFB 1234567890abcdef DEC out.txt out2.txt 01234567 3
-  python CipherDriver.py RSACFB pubkey.pem ENC big.txt out.txt iviviviv 10
+  python CipherDriver.py RSACFB pubkey.pem ENC long.txt out.txt iviviviv 10
   python CipherDriver.py RSACFB privkey.pem DEC out.txt out2.txt iviviviv 10
 '''
 
 from DESCipher import DESCipher
 from RSACipher import RSACipher
-
-def strToBinStr(myS): # translate a string to a binary string
-  myL = []
-  for i in range(len(myS)):
-    x = bin(ord(myS[i]))[2:] # i-th char in myS to int to binary & strip '0b' (gets a binary string)
-    x = ('0' * (8 - len(x))) + x # prepend missing 0s if needed
-    myL.append(x)
-  return ''.join(myL)
-  
-def binStrToStr(myB): # undo strToBinStr - translate binary string to regular string
-  myS = ''
-  for i in range(0, len(myB), 8): # translate 8 bits at a time
-    myS += chr(int(myB[i:i+8], 2))
-  return myS
+from binaryStrings import *
 
 def encryptCFB(cipher, plaintext, IV, s):
   ciphertext = '' 
@@ -53,10 +40,9 @@ def decryptCFB(cipher, ciphertext, IV, s):
   shiftreg = strToBinStr(IV)
   ciphertext = strToBinStr(ciphertext)
 
-  # if ciphertext isn't divisible by s, s is wrong
-  if len(ciphertext)%s != 0:
-    print "WARNING: ciphertext doesn't fit correctly into blocks, this may cause errors"
-
+  # if ciphertext isn't divisible by s, strToBinStr put extra padding or s is wrong
+  trimLastByte(ciphertext, s)
+  
   for i in range(len(ciphertext) / s):
     temp = strToBinStr(cipher.encrypt(binStrToStr(shiftreg))) # encrypt shiftreg
 

@@ -63,10 +63,10 @@ class RSACipher (CipherInterface):
     cipherBlocks = []                                           # Initialized empty list of cipher blocks
     for i in range(len(blocks)):                                # For each block of plaintext, encrypt the block
       try:
-        print len(blocks[i])
+#        print len(blocks[i])
         oneCipherBlock = self._key.encrypt(blocks[i], 32)[0]
       except ValueError:
-        print "\nERROR: couldn't process a block"
+        print "ERROR: couldn't process a block"
         sys.exit(-1)
       while len(oneCipherBlock) < maxSize:
         oneCipherBlock = "\x00" + oneCipherBlock
@@ -97,7 +97,8 @@ class RSACipher (CipherInterface):
         try:
           decipherBlocks.append(self._key.decrypt(blocks[i])) # Note: RSAObj's decryption function doesn't return a tuple like encrypt
         except ValueError:
-          print "\nERROR: couldn't process a block"
+          print "ERROR: couldn't process a block"
           sys.exit(-1)
       deciphered = "".join(decipherBlocks)                  # Concatinate the decrypted blocks into a string
     return deciphered                                       # Return the deciphered text
+
